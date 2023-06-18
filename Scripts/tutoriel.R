@@ -2,7 +2,7 @@ library(recomeristem)
 library(DEoptim)
 library(ggplot2)
 
-workspace <- "D:/Workspace/Seminaire/Tutorial/"
+workspace <- "D:/Workspace/Rdev/Ecomeristem_tutorial/Data/"
 isInit <- FALSE
 estimParam <- read.csv(paste0(workspace,"estimparam.csv"), sep=";")
 bounds <- as.data.frame(estimParam[,c(2,3)])
@@ -29,7 +29,7 @@ fitness_fn <- function(p) {
 }
 
 optim <- DEoptim(fitness_fn, lower=bounds[,1], upper=bounds[,2],
-                 DEoptim.control(itermax = 100))
+                 DEoptim.control(itermax = 50))
 
 finalParam <- data.frame(Param = paramNames, Values = optim$optim$bestmem,
                          Lower = bounds[,1], Upper = bounds[,2])
