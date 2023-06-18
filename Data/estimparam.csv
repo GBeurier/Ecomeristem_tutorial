@@ -1,0 +1,5 @@
+Param;Lower;Upper
+Ict;0.5;2.5
+MGR_init;6;14
+phyllo_init;30;40
+leaf_length_to_IN_length;0.1;0.2
