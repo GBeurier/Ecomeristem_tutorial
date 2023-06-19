@@ -1,0 +1,13 @@
+Package: ecomeristem
+Type: Package
+Title: The Ecomeristem model
+Version: 1.0
+Date: 2023-06-13
+Author: Gregory Beurier, Florian Larue, Delphine Luquet
+Maintainer: Gregory Beurier <beurier@cirad.fr>
+Description: A simulator for the Ecomeristem model, a ecophysiological simulation model for rice and sorghum.
+License: GPL (>= 2)
+Imports: Rcpp
+LinkingTo: Rcpp
+Built: R 4.3.0; x86_64-w64-mingw32; 2023-06-19 14:23:04 UTC; windows
+Archs: x64
