@@ -9,7 +9,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
 
-# Installation du package recomeristem
+# Installation du package ecomeristem
 
 Le modèle Ecomeristem existe sous deux formes, une application (QT) permettant
 l'introspection d'une simulation (à l'échelle de l'organe) et un package R
@@ -19,44 +19,44 @@ utilisé pour l'analyse plus globale de simulations
 Dans les faits, c'est essentiellement le package R qui est utilisé, notamment
 pour l'estimation de paramètres, l'idéotypage, etc.
 
-Tout d'abord, installez le package recomeristem, disponible sur github 
+Tout d'abord, installez le package ecomeristem, disponible sur github 
 à l'adresse suivante :
 
 https://github.com/GBeurier/Ecomeristem_tutorial
 
 Vérifiez bien la version de R installé sur votre machine afin de récupérer
-la bonne version du package recomeristem.
+la bonne version du package ecomeristem.
 
 Copiez ensuite le dossier téléchargé et collez le dans le sous-dossier "library"
 de votre installation R (généralement : C:/Program Files/R/R-X.X.X/library)
 
-Si tout s'est bien déroulé, le package recomeristem peut être chargé de la façon 
+Si tout s'est bien déroulé, le package ecomeristem peut être chargé de la façon 
 suivante :
 
 ```{r}
-library(recomeristem)
+library(ecomeristem)
 ```
 
 # Fonctions de base du package
 
-Le package recomeristem est un interfaçage entre le langage de programmation R 
+Le package ecomeristem est un interfaçage entre le langage de programmation R 
 et le modèle Ecomeristem à travers des fonctions de base permettant de 
 communiquer avec le modèle (et des simulations).
 
 ## 1. Données d'entrée
 
 La première étape consiste à importer les données d'entrée du modèle. Trois 
-fonctions de recomeristem permettent de récupérer chaque type de donnée (météo, 
+fonctions de ecomeristem permettent de récupérer chaque type de donnée (météo, 
 paramètres, observations) :
 
 ```{r}
 
-PATH_TO_FOLDER <- "../data/"
-PATH_TO_FILE <- "../data/vobs.txt"
+PATH_TO_FOLDER <- "Data/"
+PATH_TO_FILE <- "Data/vobs.txt"
 
-weather <- recomeristem::getMeteo_from_files(PATH_TO_FOLDER)
-param <- recomeristem::getParameters_from_files(PATH_TO_FOLDER)
-obs <- recomeristem::get_clean_obs(PATH_TO_FILE)
+weather <- ecomeristem::getMeteo_from_files(PATH_TO_FOLDER)
+param <- ecomeristem::getParameters_from_files(PATH_TO_FOLDER)
+obs <- ecomeristem::get_clean_obs(PATH_TO_FILE)
 
 ```
 
@@ -106,11 +106,11 @@ simulation uniquement à l'aide de ces dataframes.
 La seconde étape consiste à initialiser une simulation. Cette opération va
 créer un objet simulation qu'il sera ensuite possible de lancer pour récupérer
 les résultats, ou de le modifier (par exemple pour tester d'autres valeurs de
-paramètres). L'initialisation dans recomeristem se fait de la façon suivante :
+paramètres). L'initialisation dans ecomeristem se fait de la façon suivante :
 
 ```{r}
 
-recomeristem::init_simu(param, weather, obs, "simu1")
+ecomeristem::init_simu(param, weather, obs, "simu1")
 
 ```
 
@@ -131,7 +131,7 @@ fonction suivante :
 
 ```{r}
 
-res <- recomeristem::launch_simu("simu1")
+res <- ecomeristem::launch_simu("simu1")
 head(res)
 
 ```
@@ -150,7 +150,7 @@ la fonction launch_simu :
 ```{r}
 
 # on lance une simulation en modifiant le paramètre phyllo_init à la valeur 35
-res <- recomeristem::launch_simu("simu1", c("phyllo_init"), c(35))
+res <- ecomeristem::launch_simu("simu1", c("phyllo_init"), c(35))
 head(res)
 
 ```
@@ -162,7 +162,7 @@ changeant la météo avec la fonction launch_simu_meteo :
 
 weather2 <- weather
 weather2$Temperature <- weather2$Temperature + 3
-res <- recomeristem::launch_simu_meteo("simu1", weather2)
+res <- ecomeristem::launch_simu_meteo("simu1", weather2)
 head(res)
 
 ```
@@ -172,7 +172,7 @@ de dataframes (voir point 1. pour exemple) de la façon suivante :
 
 ```{r}
 
-res <- recomeristem::rcpp_run_from_dataframe(param, weather)
+res <- ecomeristem::rcpp_run_from_dataframe(param, weather)
 head(res[,1:5]) # head des 5 premières colonnes
 
 ```
@@ -187,7 +187,7 @@ correspondants aux dates et traits du dataframe d'observations
 
 ```{r}
 
-res <- recomeristem::rcpp_reduceResults(res, obs)
+res <- ecomeristem::rcpp_reduceResults(res, obs)
 head(res)
 
 ```
@@ -201,8 +201,8 @@ possible de les retirer automatiquement à l'aide de la fonction suivante :
 obs$test <- 1234 # ajout d'une variable absente de res
 head(obs)
 
-res <- recomeristem::rcpp_run_from_dataframe(param, weather)
-obs <- recomeristem::rcpp_reduceVobs(obs, res)
+res <- ecomeristem::rcpp_run_from_dataframe(param, weather)
+obs <- ecomeristem::rcpp_reduceVobs(obs, res)
 head(obs)
 
 ```
@@ -210,7 +210,7 @@ head(obs)
 
 # Exemple d'utilisation : estimation de paramètres
 
-Dans ce tutoriel on va utiliser le package recomeristem pour 
+Dans ce tutoriel on va utiliser le package ecomeristem pour 
 l'estimation de paramètres. Avant de commencer, chargement des packages et 
 lecture des données :
 
@@ -219,14 +219,14 @@ lecture des données :
 # au besoin installez DEoptim (algorithme d'optimisation)
 # install.packages("DEoptim")
 
-# chargez les packages recomeristem et DEoptim
-library(recomeristem)
+# chargez les packages ecomeristem et DEoptim
+library(ecomeristem)
 library(DEoptim)
 
 # lire les données
-weather <- recomeristem::getMeteo_from_files(PATH_TO_FOLDER)
-param <- recomeristem::getParameters_from_files(PATH_TO_FOLDER)
-obs <- recomeristem::get_clean_obs(PATH_TO_FILE)
+weather <- ecomeristem::getMeteo_from_files(PATH_TO_FOLDER)
+param <- ecomeristem::getParameters_from_files(PATH_TO_FOLDER)
+obs <- ecomeristem::get_clean_obs(PATH_TO_FILE)
 
 # lire les données d'estimation
 estimParam <- read.csv(paste0(PATH_TO_FOLDER,"estimparam.csv"), sep=";")
@@ -261,12 +261,12 @@ error_fn <- function(obs, sim) {
 isInit <- FALSE # permet de vérifier si une simulation est déjà initiée
 fitness_fn <- function(p) {
   if(!isInit) { # si la simulation n'est pas encore initiée, l'initier
-    recomeristem::init_simu(param, weather, obs, "sim1")
+    ecomeristem::init_simu(param, weather, obs, "sim1")
     isInit <- TRUE
   }
   
   # lancer la simu en modifiant les valeurs de paramètres
-  sim <- recomeristem::launch_simu("sim1", paramNames, p)
+  sim <- ecomeristem::launch_simu("sim1", paramNames, p)
   # calculer l'erreur
   error <- error_fn(obs, sim)
   # retourner l'erreur
@@ -336,7 +336,7 @@ head(finalParam)
 param[match(paramNames, param$Name),"Values"] <- res$optim$bestmem
 
 # relancer la simulation avec les nouvelles valeurs de paramètres
-finalSim <- recomeristem::rcpp_run_from_dataframe(param, weather)
+finalSim <- ecomeristem::rcpp_run_from_dataframe(param, weather)
 finalSim$day <- as.numeric(row.names(finalSim))
 
 # tracer un graphe avec la simulation d'un trait (ici la biomasse aérienne)
@@ -360,7 +360,7 @@ bestmems <- unique(res$member$bestmemit)
 bestRes <- data.frame()
 for(i in 1:nrow(bestmems)) {
   param[match(paramNames, param$Name),"Values"] <- bestmems[i,]
-  bestSim <- recomeristem::rcpp_run_from_dataframe(param, weather)
+  bestSim <- ecomeristem::rcpp_run_from_dataframe(param, weather)
   bestRes <- rbind(bestRes, data.frame(das = as.numeric(row.names(bestSim)),
                                        pht = bestSim$pht, it = i))
 }
