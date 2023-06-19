@@ -24,7 +24,7 @@ Tout d'abord, installez le package recomeristem, disponible sur github
 
 https://github.com/GBeurier/Ecomeristem_tutorial
 
-Vérifiez bien la version de R installé sur votre machine afin de récuperer
+Vérifiez bien la version de R installé sur votre machine afin de récupérer
 la bonne version du package recomeristem.
 
 Copiez ensuite le dossier téléchargé et collez le dans le sous-dossier "library"
@@ -41,12 +41,13 @@ library(recomeristem)
 
 Le package recomeristem est un interfaçage entre le langage de programmation R 
 et le modèle Ecomeristem à travers des fonctions de base permettant de 
-communiqueravec le modèle (et des simulations).
+communiquer avec le modèle (et des simulations).
 
 ## 1. Données d'entrée
 
-La première étape consiste à importer les données d'entrée en utilisant les 
-fonctions suivantes du package recomeristem :
+La première étape consiste à importer les données d'entrée du modèle. Trois 
+fonctions de recomeristem permettent de récupérer chaque type de donnée (météo, 
+paramètres, observations) :
 
 ```{r}
 
@@ -102,7 +103,7 @@ simulation uniquement à l'aide de ces dataframes.
 
 ## 2. Initiation d'une simulation
 
-Le seconde étape consiste à initialiser une simulation. Cette opération va
+La seconde étape consiste à initialiser une simulation. Cette opération va
 créer un objet simulation qu'il sera ensuite possible de lancer pour récupérer
 les résultats, ou de le modifier (par exemple pour tester d'autres valeurs de
 paramètres). L'initialisation dans recomeristem se fait de la façon suivante :
@@ -114,12 +115,12 @@ recomeristem::init_simu(param, weather, obs, "simu1")
 ```
 
 La fonction d'initialisation prend donc en argument les données d'entrées 
-précédemment importés (paramètres, météos et observations) ainsi qu'un 
+précédemment importées (paramètres, météos et observations) ainsi qu'un 
 nom permettant d'identifier une simulation (plusieurs simulations peuvent être
-initiés en même temps). 
+initiées en même temps). 
 Cette étape est généralement utile pendant l'estimation de paramètres car elle
 accélère le temps d'exécution (il n'est plus nécessaire d'instancier les
-objets déjà créés et les informations utiles à la simulation sont modifiés à la 
+objets déjà créés et les informations utiles à la simulation sont modifiées à la 
 volée).
 
 
@@ -136,9 +137,35 @@ head(res)
 ```
 
 La fonction launch_simu renvoie un dataframe avec les résultats de simulations.
-La particularité de ce dataframe est qu'il ne contient que les valeurs simulés
-aux dates auxquels il y a une observations (et pour les traits phénotypiques 
+La particularité de ce dataframe est qu'il ne contient que les valeurs simulées
+aux dates où il y a une observation (et pour les traits phénotypiques 
 observés).
+
+L'avantage d'initier une simulation est donc de pouvoir la modifier sans avoir
+besoin de charger à nouveau toutes les données en mémoire (météo, paramètres, 
+objets). 
+Pour modifier les paramètres d'une simulation initiée, on passe également par 
+la fonction launch_simu :
+
+```{r}
+
+# on lance une simulation en modifiant le paramètre phyllo_init à la valeur 35
+res <- recomeristem::launch_simu("simu1", c("phyllo_init"), c(35))
+head(res)
+
+```
+
+De façon similaire on peut également relancer une simulation initiée en 
+changeant la météo avec la fonction launch_simu_meteo :
+
+```{r}
+
+weather2 <- weather
+weather2$Temperature <- weather2$Temperature + 3
+res <- recomeristem::launch_simu_meteo("simu1", weather2)
+head(res)
+
+```
 
 Alternativement, une simulation peut être lancée sans être initiée à partir
 de dataframes (voir point 1. pour exemple) de la façon suivante :
@@ -155,7 +182,7 @@ l'ensemble de la simulation (toutes les variables simulées pour l'ensemble des
 dates du premier jour de simulation au dernier jour).
 
 Il est alors possible de réduire les résultats pour n'afficher que les résultats
-correspondant aux dates et traits du dataframe d'observations 
+correspondants aux dates et traits du dataframe d'observations 
 (similaire à ce qui est retourné par la fonction launch_simu) :
 
 ```{r}
@@ -166,7 +193,7 @@ head(res)
 ```
 
 A noter que si le fichier observations contient des colonnes (et/ou dates) qui
-ne sont pas présents dans le dataframe de résultats de simulation, il est aussi
+ne sont pas présentes dans le dataframe de résultats de simulation, il est aussi
 possible de les retirer automatiquement à l'aide de la fonction suivante :
 
 ```{r}
@@ -183,7 +210,7 @@ head(obs)
 
 # Exemple d'utilisation : estimation de paramètres
 
-Dans ce tutoriel on va voir l'utilisation du package recomeristem pour 
+Dans ce tutoriel on va utiliser le package recomeristem pour 
 l'estimation de paramètres. Avant de commencer, chargement des packages et 
 lecture des données :
 
@@ -213,8 +240,8 @@ head(estimParam)
 L'estimation de paramètres consiste à trouver les valeurs de quelques paramètres
 génotypiques qui minimisent les écarts entre les simulations et les observations.
 L'algorithme d'optimisation (ici DEoptim) fournit à chaque itération un set de
-paramètres à tester (valeurs entre les bornes définit dans "bounds",
-pour les paramètres définit dans "paramNames")
+paramètres à tester (valeurs entre les bornes définies dans "bounds",
+pour les paramètres définis dans "paramNames")
 
 ## 1. Mise en place de l'optimisation
 
@@ -262,9 +289,9 @@ res <- DEoptim(fn = fitness_fn, lower = bounds[,1], upper = bounds[,2],
 
 Ici pour l'exemple on ne lance que 20 itérations (itermax = 20), en réalité il 
 faut un nombre bien plus important d'itérations pour trouver un optimum (dans
-les travaux récents, plutôt autour de 2500-5000 itérations).
+les travaux récents avec Ecomeristem, plutôt autour de 2500-5000 itérations).
 
-DEoptim renvoie une liste avec plusieurs éléments. D'abord l'élément optim qui
+DEoptim renvoie une liste avec plusieurs éléments. D'abord l'élément "optim" qui
 résume la valeur de chaque paramètre trouvé, la plus petite erreur trouvée, le
 nombre d'évaluations (à chaque itération plusieurs évaluations ont lieu) et le
 nombre d'itérations avant l'arrêt de l'algorithme. A noter que d'autres critères
@@ -277,7 +304,7 @@ head(res$optim)
 
 ```
 
-Ensuite l'élément member qui résume dans le sous-élément bestmemit le meilleur
+Ensuite l'élément "member" qui résume dans le sous-élément bestmemit le meilleur
 candidat à chaque itération et dans le sous-élément pop les valeurs de paramètres
 pour chaque évaluation.
 
@@ -347,13 +374,13 @@ print(plt2)
 
 La dernière itération n'est pas spécialement le meilleur candidat pour le trait
 qu'on regarde ici (pht). Ce qui amène à un point important de l'estimation de 
-paramètres présenté dans ce tutoriel : l'erreur est calculé sur un ensemble
+paramètres présenté dans ce tutoriel : l'erreur est calculée sur un ensemble
 de traits phénotypiques (une RMSE normalisée, sur toutes les dates de mesures 
 et tous les traits dans le fichier vobs.txt). De fait, si un candidat a une 
 erreur globale plus faible, il sera sélectionné même si cela implique d'augmenter
 l'erreur sur un trait donné. Une solution envisageable est de faire de 
 l'optimisation multi-critère. Cela dépasse le cadre de ce tutoriel mais pour les
-personnes intéressés, voir par exemple :
+personnes intéressées, voir par exemple :
 
 Tamaki, H., Kita, H., & Kobayashi, S. (1996, May). Multi-objective optimization by genetic algorithms: A review. In Proceedings of IEEE international conference on evolutionary computation (pp. 517-522). IEEE
 
@@ -362,7 +389,7 @@ Konak, A., Coit, D. W., & Smith, A. E. (2006). Multi-objective optimization usin
 
 D'autres pistes d'améliorations peuvent être explorées avant de passer à 
 l'optimisation multi-critère : en modifiant la fonction de calcul de l'erreur
-pour mettre de poids sur l'une ou l'autre variable prioritaire par exemple.
+pour mettre du poids sur l'un ou l'autre trait prioritaire par exemple.
 
 Lorsque les paramètres pour un génotype donné ont été estimés, il est alors 
 possible d'utiliser le modèle Ecomeristem pour d'autres analyses tels que 
