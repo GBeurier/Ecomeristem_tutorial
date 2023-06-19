@@ -1,3 +1,0 @@
-useDynLib(recomeristem)
-exportPattern("^[[:alpha:]]+")
-importFrom(Rcpp, evalCpp)
